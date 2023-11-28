@@ -102,11 +102,6 @@
                                             {{ trans('cruds.logPinjam.title') }}
                                         </a>
                                     @endcan
-                                    @can('user_alert_access')
-                                        <a class="dropdown-item" href="{{ route('frontend.user-alerts.index') }}">
-                                            {{ trans('cruds.userAlert.title') }}
-                                        </a>
-                                    @endcan
                                     @can('master_access')
                                         <a class="dropdown-item disabled" href="#">
                                             {{ trans('cruds.master.title') }}
@@ -125,6 +120,11 @@
                                     @can('pinjam_access')
                                         <a class="dropdown-item" href="{{ route('frontend.pinjams.index') }}">
                                             {{ trans('cruds.pinjam.title') }}
+                                        </a>
+                                    @endcan
+                                    @can('user_alert_access')
+                                        <a class="dropdown-item" href="{{ route('frontend.user-alerts.index') }}">
+                                            {{ trans('cruds.userAlert.title') }}
                                         </a>
                                     @endcan
 

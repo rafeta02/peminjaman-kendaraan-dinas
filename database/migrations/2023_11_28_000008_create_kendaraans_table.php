@@ -12,6 +12,7 @@ class CreateKendaraansTable extends Migration
             $table->bigIncrements('id');
             $table->string('plat_no')->unique();
             $table->string('type');
+            $table->string('slug')->nullable();
             $table->longText('description')->nullable();
             $table->integer('capacity');
             $table->timestamps();
