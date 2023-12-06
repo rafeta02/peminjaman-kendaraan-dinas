@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
+use Alert;
 
 class KendaraanController extends Controller
 {
@@ -86,6 +87,8 @@ class KendaraanController extends Controller
             Media::whereIn('id', $media)->update(['model_id' => $kendaraan->id]);
         }
 
+        Alert::success('Kendaraan created successfully.');
+
         return redirect()->route('admin.kendaraans.index');
     }
 
@@ -124,6 +127,8 @@ class KendaraanController extends Controller
                 $kendaraan->addMedia(storage_path('tmp/uploads/' . basename($file)))->toMediaCollection('gallery');
             }
         }
+
+        Alert::success('Kendaraan updated successfully.');
 
         return redirect()->route('admin.kendaraans.index');
     }

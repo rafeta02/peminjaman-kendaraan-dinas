@@ -12,6 +12,7 @@ use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\Facades\DataTables;
+use Alert;
 
 class SopirController extends Controller
 {
@@ -72,6 +73,8 @@ class SopirController extends Controller
     {
         $sopir = Sopir::create($request->all());
 
+        Alert::success('Sopir created successfully.');
+
         return redirect()->route('admin.sopirs.index');
     }
 
@@ -85,6 +88,8 @@ class SopirController extends Controller
     public function update(UpdateSopirRequest $request, Sopir $sopir)
     {
         $sopir->update($request->all());
+
+        Alert::success('Sopir updated successfully.');
 
         return redirect()->route('admin.sopirs.index');
     }
