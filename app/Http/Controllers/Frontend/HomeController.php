@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Frontend;
+use App\Models\Kendaraan;
 
 class HomeController
 {
     public function index()
     {
-        return view('frontend.home');
+        $mobil = Kendaraan::all()->count();
+
+        return view('frontend.home', compact('mobil'));
     }
 }

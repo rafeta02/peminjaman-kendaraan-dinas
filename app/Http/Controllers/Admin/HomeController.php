@@ -132,7 +132,7 @@ class HomeController
             'aggregate_function'    => 'count',
             'filter_field'          => 'created_at',
             'filter_period'         => 'month',
-            'group_by_field_format' => 'd-m-Y H:i:s',
+            'group_by_field_format' => 'd-m-Y H:i',
             'column_class'          => 'col-md-12',
             'entries_number'        => '5',
             'translation_key'       => 'pinjam',
@@ -149,7 +149,7 @@ class HomeController
             'group_by_period'       => 'day',
             'aggregate_function'    => 'count',
             'filter_field'          => 'created_at',
-            'group_by_field_format' => 'd-m-Y H:i:s',
+            'group_by_field_format' => 'd-m-Y H:i',
             'column_class'          => 'col-md-12',
             'entries_number'        => '10',
             'fields'                => [

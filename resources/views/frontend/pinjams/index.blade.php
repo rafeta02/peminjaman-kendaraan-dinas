@@ -3,22 +3,16 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            @can('pinjam_create')
-                <div style="margin-bottom: 10px;" class="row">
-                    <div class="col-lg-12">
-                        <a class="btn btn-success" href="{{ route('frontend.pinjams.create') }}">
-                            {{ trans('global.add') }} {{ trans('cruds.pinjam.title_singular') }}
-                        </a>
-                        <button class="btn btn-warning" data-toggle="modal" data-target="#csvImportModal">
-                            {{ trans('global.app_csvImport') }}
-                        </button>
-                        @include('csvImport.modal', ['model' => 'Pinjam', 'route' => 'admin.pinjams.parseCsvImport'])
-                    </div>
+            <div style="margin-bottom: 10px;" class="row">
+                <div class="col-lg-12">
+                    <a class="btn btn-success" href="{{ route('frontend.pinjams.create') }}">
+                        {{ trans('global.add') }} {{ trans('cruds.pinjam.title_singular') }}
+                    </a>
                 </div>
-            @endcan
+            </div>
             <div class="card">
                 <div class="card-header">
-                    {{ trans('cruds.pinjam.title_singular') }} {{ trans('global.list') }}
+                    {{ trans('global.list') }} {{ trans('cruds.pinjam.title_singular') }}
                 </div>
 
                 <div class="card-body">
@@ -26,28 +20,22 @@
                         <table class=" table table-bordered table-striped table-hover datatable datatable-Pinjam">
                             <thead>
                                 <tr>
-                                    <th>
+                                    <th class="text-center">
                                         {{ trans('cruds.pinjam.fields.name') }}
                                     </th>
-                                    <th>
-                                        {{ trans('cruds.pinjam.fields.no_wa') }}
-                                    </th>
-                                    <th>
+                                    <th class="text-center">
                                         {{ trans('cruds.pinjam.fields.kendaraan') }}
                                     </th>
-                                    <th>
-                                        {{ trans('cruds.pinjam.fields.date_start') }}
+                                    <th class="text-center">
+                                        Waktu Peminjaman
                                     </th>
-                                    <th>
-                                        {{ trans('cruds.pinjam.fields.reason') }}
-                                    </th>
-                                    <th>
+                                    <th class="text-center">
                                         {{ trans('cruds.pinjam.fields.status') }}
                                     </th>
-                                    <th>
+                                    <th class="text-center">
                                         {{ trans('cruds.pinjam.fields.surat_permohonan') }}
                                     </th>
-                                    <th>
+                                    <th class="text-center">
                                         &nbsp;
                                     </th>
                                 </tr>
@@ -55,52 +43,72 @@
                             <tbody>
                                 @foreach($pinjams as $key => $pinjam)
                                     <tr data-entry-id="{{ $pinjam->id }}">
-                                        <td>
-                                            {{ $pinjam->name ?? '' }}
+                                        <td class="text-center">
+                                            <u>{{ $pinjam->name ?? '' }}</u><br>No WhatsApp :<br>({{ $pinjam->no_wa ?? '' }})
                                         </td>
-                                        <td>
-                                            {{ $pinjam->no_wa ?? '' }}
+                                        <td class="text-center">
+                                            <u>{{ $pinjam->kendaraan->no_pol ?? '' }}</u><br>({{ $pinjam->kendaraan->type ?? '' }})
                                         </td>
-                                        <td>
-                                            {{ $pinjam->kendaraan->type ?? '' }}
+                                        <td class="text-center">
+                                            {{ $pinjam->date_start }}<br><i>sd</i><br>{{ $pinjam->date_end }}
                                         </td>
-                                        <td>
-                                            {{ $pinjam->date_start ?? '' }}
-                                        </td>
-                                        <td>
-                                            {{ $pinjam->reason ?? '' }}
-                                        </td>
-                                        <td>
-                                            {{ App\Models\Pinjam::STATUS_SELECT[$pinjam->status] ?? '' }}
-                                        </td>
-                                        <td>
-                                            @if($pinjam->surat_permohonan)
-                                                <a href="{{ $pinjam->surat_permohonan->getUrl() }}" target="_blank">
-                                                    {{ trans('global.view_file') }}
-                                                </a>
+                                        <td class="text-center">
+                                            <span class="badge badge-{{ App\Models\Pinjam::STATUS_BACKGROUND[$pinjam->status] }}">{{ App\Models\Pinjam::STATUS_SELECT[$pinjam->status] }}</span>
+                                            <br>
+                                            @if($pinjam->status == 'ditolak')
+                                                {{ $pinjam->status_text }}
+                                            @endif
+                                            @php
+                                                $now = Carbon\Carbon::now();
+                                                $end = Carbon\Carbon::parse($pinjam->date_end);
+                                            @endphp
+                                            @if($pinjam->status == 'diproses' && $now->gt($end))
+                                                <br>
+                                                @if(count($pinjam->laporan_kegiatan) > 0)
+                                                    Laporan Kegiatan :<br><span class="badge badge-success">Sudah Upload</span>
+                                                @else
+                                                    Laporan Kegiatan :<br><span class="badge badge-warning">Belum Upload</span>
+                                                @endif
+                                                <br>
+                                                @if(count($pinjam->laporan_kegiatan) > 0)
+                                                    Foto Kegiatan :<br><span class="badge badge-success">Sudah Upload</span>
+                                                @else
+                                                    Foto Kegiatan :<br><span class="badge badge-warning">Belum Upload</span>
+                                                @endif
                                             @endif
                                         </td>
-                                        <td>
-                                            @can('pinjam_show')
-                                                <a class="btn btn-xs btn-primary" href="{{ route('frontend.pinjams.show', $pinjam->id) }}">
-                                                    {{ trans('global.view') }}
-                                                </a>
-                                            @endcan
-
-                                            @can('pinjam_edit')
-                                                <a class="btn btn-xs btn-info" href="{{ route('frontend.pinjams.edit', $pinjam->id) }}">
+                                        <td class="text-center">
+                                            @if($pinjam->surat_permohonan)
+                                                Surat Permohonan :<br><span class="badge badge-success">Sudah Upload</span>
+                                            @else
+                                                Surat Permohonan :<br><span class="badge badge-warning">Belum Upload</span>
+                                            @endif
+                                            <br>
+                                            @if($pinjam->surat_izin)
+                                                Surat Izin :<br><span class="badge badge-success">Sudah Upload</span>
+                                            @else
+                                                Surat Izin :<br><span class="badge badge-warning">Belum Upload</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="btn btn-sm btn-primary btn-block" href="{{ route('frontend.pinjams.show', $pinjam->id) }}">
+                                                {{ trans('global.view') }}
+                                            </a>
+                                            @if($pinjam->status == 'diajukan')
+                                                <a class="btn btn-sm btn-info btn-block" href="{{ route('frontend.pinjams.edit', $pinjam->id) }}">
                                                     {{ trans('global.edit') }}
                                                 </a>
-                                            @endcan
-
-                                            @can('pinjam_delete')
                                                 <form action="{{ route('frontend.pinjams.destroy', $pinjam->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                                     <input type="hidden" name="_method" value="DELETE">
                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                                    <input type="submit" class="btn btn-sm btn-danger btn-block" value="{{ trans('global.delete') }}">
                                                 </form>
-                                            @endcan
-
+                                            @endif
+                                            @if($pinjam->status == 'diproses')
+                                                <a class="btn btn-sm btn-warning btn-block" href="{{ route('frontend.pinjams.laporan', $pinjam->id) }}">
+                                                    Upload LPJ
+                                                </a>
+                                            @endif
                                         </td>
 
                                     </tr>
@@ -110,7 +118,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -118,50 +125,20 @@
 @section('scripts')
 @parent
 <script>
-    $(function () {
+$(function () {
   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-@can('pinjam_delete')
-  let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
-  let deleteButton = {
-    text: deleteButtonTrans,
-    url: "{{ route('frontend.pinjams.massDestroy') }}",
-    className: 'btn-danger',
-    action: function (e, dt, node, config) {
-      var ids = $.map(dt.rows({ selected: true }).nodes(), function (entry) {
-          return $(entry).data('entry-id')
-      });
-
-      if (ids.length === 0) {
-        alert('{{ trans('global.datatables.zero_selected') }}')
-
-        return
-      }
-
-      if (confirm('{{ trans('global.areYouSure') }}')) {
-        $.ajax({
-          headers: {'x-csrf-token': _token},
-          method: 'POST',
-          url: config.url,
-          data: { ids: ids, _method: 'DELETE' }})
-          .done(function () { location.reload() })
-      }
-    }
-  }
-  dtButtons.push(deleteButton)
-@endcan
 
   $.extend(true, $.fn.dataTable.defaults, {
     orderCellsTop: true,
-    order: [[ 3, 'desc' ]],
     pageLength: 25,
   });
-  let table = $('.datatable-Pinjam:not(.ajaxTable)').DataTable({ buttons: dtButtons })
+
+  let table = $('.datatable-Pinjam:not(.ajaxTable)').DataTable({ buttons: dtButtons });
+
   $('a[data-toggle="tab"]').on('shown.bs.tab click', function(e){
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
 })
-
 </script>
 @endsection

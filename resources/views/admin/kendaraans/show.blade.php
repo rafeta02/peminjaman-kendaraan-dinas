@@ -54,7 +54,7 @@
                         <td>
                             @if($kendaraan->photo)
                                 <a href="{{ $kendaraan->photo->getUrl() }}" target="_blank" style="display: inline-block">
-                                    <img src="{{ $kendaraan->photo->getUrl('thumb') }}">
+                                    <img src="{{ $kendaraan->photo->getUrl() }}">
                                 </a>
                             @endif
                         </td>
@@ -66,7 +66,7 @@
                         <td>
                             @foreach($kendaraan->gallery as $key => $media)
                                 <a href="{{ $media->getUrl() }}" target="_blank" style="display: inline-block">
-                                    <img src="{{ $media->getUrl('thumb') }}">
+                                    <img src="{{ $media->getUrl() }}">
                                 </a>
                             @endforeach
                         </td>

@@ -115,4 +115,19 @@ class SopirController extends Controller
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
+
+    public function getSopir(Request $request)
+    {
+        $keywords = $request->input('keywords');
+        $sopirs = Sopir::where('nama', 'LIKE', "%{$keywords}%")->orderBy('nama', 'ASC')->get();
+
+        foreach ($sopirs as $sopir) {
+            $formattedProducts[] = [
+                'id' => $sopir->id,
+                'text' => $sopir->nama,
+            ];
+        }
+
+        return response()->json($formattedProducts);
+    }
 }

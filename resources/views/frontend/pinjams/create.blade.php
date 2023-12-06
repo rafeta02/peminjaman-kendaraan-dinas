@@ -10,128 +10,129 @@
                 </div>
 
                 <div class="card-body">
+                    @if (session()->has('error-message'))
+                        <p class="text-danger">
+                            {{session()->get('error-message')}}
+                        </p>
+                    @endif
+
                     <form method="POST" action="{{ route("frontend.pinjams.store") }}" enctype="multipart/form-data">
                         @method('POST')
                         @csrf
-                        <div class="form-group">
-                            <label for="name">{{ trans('cruds.pinjam.fields.name') }}</label>
-                            <input class="form-control" type="text" name="name" id="name" value="{{ old('name', '') }}">
-                            @if($errors->has('name'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('name') }}
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="required" for="name">{{ trans('cruds.pinjam.fields.name') }}</label>
+                                    <input class="form-control" type="text" name="name" id="name" value="{{ old('name', '') }}" required>
+                                    @if($errors->has('name'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('name') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.name_helper') }}</span>
                                 </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.name_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="no_wa">{{ trans('cruds.pinjam.fields.no_wa') }}</label>
-                            <input class="form-control" type="text" name="no_wa" id="no_wa" value="{{ old('no_wa', '') }}" required>
-                            @if($errors->has('no_wa'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('no_wa') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.no_wa_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="kendaraan_id">{{ trans('cruds.pinjam.fields.kendaraan') }}</label>
-                            <select class="form-control select2" name="kendaraan_id" id="kendaraan_id" required>
-                                @foreach($kendaraans as $id => $entry)
-                                    <option value="{{ $id }}" {{ old('kendaraan_id') == $id ? 'selected' : '' }}>{{ $entry }}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('kendaraan'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('kendaraan') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.kendaraan_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="date_start">{{ trans('cruds.pinjam.fields.date_start') }}</label>
-                            <input class="form-control datetime" type="text" name="date_start" id="date_start" value="{{ old('date_start') }}" required>
-                            @if($errors->has('date_start'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('date_start') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.date_start_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="date_end">{{ trans('cruds.pinjam.fields.date_end') }}</label>
-                            <input class="form-control datetime" type="text" name="date_end" id="date_end" value="{{ old('date_end') }}" required>
-                            @if($errors->has('date_end'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('date_end') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.date_end_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="reason">{{ trans('cruds.pinjam.fields.reason') }}</label>
-                            <input class="form-control" type="text" name="reason" id="reason" value="{{ old('reason', '') }}" required>
-                            @if($errors->has('reason'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('reason') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.reason_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label>{{ trans('cruds.pinjam.fields.status') }}</label>
-                            <select class="form-control" name="status" id="status">
-                                <option value disabled {{ old('status', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
-                                @foreach(App\Models\Pinjam::STATUS_SELECT as $key => $label)
-                                    <option value="{{ $key }}" {{ old('status', 'diajukan') === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('status'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('status') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.status_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="sopir_id">{{ trans('cruds.pinjam.fields.sopir') }}</label>
-                            <select class="form-control select2" name="sopir_id" id="sopir_id">
-                                @foreach($sopirs as $id => $entry)
-                                    <option value="{{ $id }}" {{ old('sopir_id') == $id ? 'selected' : '' }}>{{ $entry }}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('sopir'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('sopir') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.sopir_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="surat_permohonan">{{ trans('cruds.pinjam.fields.surat_permohonan') }}</label>
-                            <div class="needsclick dropzone" id="surat_permohonan-dropzone">
                             </div>
-                            @if($errors->has('surat_permohonan'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('surat_permohonan') }}
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="required" for="no_wa">{{ trans('cruds.pinjam.fields.no_wa') }}</label>
+                                    <input class="form-control" type="text" name="no_wa" id="no_wa" value="{{ old('no_wa', '') }}" required>
+                                    @if($errors->has('no_wa'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('no_wa') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.no_wa_helper') }}</span>
                                 </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.surat_permohonan_helper') }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="surat_izin">{{ trans('cruds.pinjam.fields.surat_izin') }}</label>
-                            <div class="needsclick dropzone" id="surat_izin-dropzone">
                             </div>
-                            @if($errors->has('surat_izin'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('surat_izin') }}
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="required" for="kendaraan_id">{{ trans('cruds.pinjam.fields.kendaraan') }}</label>
+                                    <select name="kendaraan_id" id="kendaraan_id" class="form-control select2 {{ $errors->has('kendaraan') ? 'is-invalid' : '' }}" style="width: 100%;" required>
+                                        @if ($kendaraan)
+                                            <option value="{{ $kendaraan->id }}" selected="selected">{{$kendaraan->nama}}</option>
+                                        @else
+                                            <option value=""></option>
+                                        @endif
+                                    </select>
+                                    @if($errors->has('kendaraan'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('kendaraan') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.kendaraan_helper') }}</span>
                                 </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.pinjam.fields.surat_izin_helper') }}</span>
+                            </div>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="required" for="date_start">{{ trans('cruds.pinjam.fields.date_start') }}</label>
+                                    <input class="form-control datetime" type="text" name="date_start" id="date_start" value="{{ old('date_start') }}" required>
+                                    @if($errors->has('date_start'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('date_start') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.date_start_helper') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="required" for="date_end">{{ trans('cruds.pinjam.fields.date_end') }}</label>
+                                    <input class="form-control datetime" type="text" name="date_end" id="date_end" value="{{ old('date_end') }}" required>
+                                    @if($errors->has('date_end'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('date_end') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.date_end_helper') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="required" for="reason">{{ trans('cruds.pinjam.fields.reason') }}</label>
+                                    <input class="form-control" type="text" name="reason" id="reason" value="{{ old('reason', '') }}" required>
+                                    @if($errors->has('reason'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('reason') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.reason_helper') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label for="surat_permohonan">{{ trans('cruds.pinjam.fields.surat_permohonan') }}</label>
+                                    <div class="needsclick dropzone" id="surat_permohonan-dropzone">
+                                    </div>
+                                    @if($errors->has('surat_permohonan'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('surat_permohonan') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.surat_permohonan_helper') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label for="surat_izin">{{ trans('cruds.pinjam.fields.surat_izin') }}</label>
+                                    <div class="needsclick dropzone" id="surat_izin-dropzone">
+                                    </div>
+                                    @if($errors->has('surat_izin'))
+                                        <div class="invalid-feedback">
+                                            {{ $errors->first('surat_izin') }}
+                                        </div>
+                                    @endif
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.surat_izin_helper') }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <button class="btn btn-danger" type="submit">
-                                {{ trans('global.save') }}
-                            </button>
+                        <div class="row mt-5">
+                            <div class="col-12 text-center">
+                                <div class="form-group">
+                                    <button class="btn btn-danger" type="submit">
+                                        {{ trans('global.save') }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -242,5 +243,55 @@
          return _results
      }
 }
+</script>
+<script>
+    $(document).ready(function() {
+        $('#kendaraan_id').select2({
+            templateResult: formatProduct,
+            templateSelection: formatProductSelection,
+            ajax: {
+                    url: "{{ route('frontend.pinjams.getKendaraan') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            keywords: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+        });
+
+        function formatProduct(kendaraan) {
+            if (!kendaraan.id) {
+                return kendaraan.text;
+            }
+
+            var kendaraanInfo = $('<span>' + kendaraan.text + '</span><br><small class="stock-info">' + kendaraan.deskripsi + '</small>');
+            return kendaraanInfo;
+        }
+
+        function formatProductSelection(kendaraan) {
+            return kendaraan.text;
+        }
+    });
+</script>
+
+<script>
+    $(function () {
+        $('#date_start').datetimepicker().on('dp.change', function (e) {
+            $('#date_end').data('DateTimePicker').minDate(e.date);
+        });
+
+        $('#date_end').datetimepicker().on('dp.change', function (e) {
+            $('#date_start').data('DateTimePicker').maxDate(e.date);
+            $('#date_end').data('DateTimePicker').minDate($('#date_start').val());
+        });
+    });
 </script>
 @endsection

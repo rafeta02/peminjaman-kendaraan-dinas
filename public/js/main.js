@@ -17,14 +17,18 @@ $(document).ready(function () {
   })
 
   $('.datetime').datetimepicker({
-    format: 'DD-MM-YYYY HH:mm:ss',
+    format: 'DD-MM-YYYY HH:mm',
     locale: 'en',
+    useCurrent: false,
     sideBySide: true,
+    stepping: 30,
     icons: {
+      time: 'far fa-clock',
       up: 'fas fa-chevron-up',
       down: 'fas fa-chevron-down',
       previous: 'fas fa-chevron-left',
-      next: 'fas fa-chevron-right'
+      next: 'fas fa-chevron-right',
+      date: "fa fa-calendar"
     }
   })
 
@@ -69,3 +73,13 @@ $(document).ready(function () {
     }, 350);
   })
 })
+
+function showLoading() {
+    document.querySelector('#loading').classList.add('loading');
+    document.querySelector('#loading-content').classList.add('loading-content');
+}
+
+function hideLoading() {
+    document.querySelector('#loading').classList.remove('loading');
+    document.querySelector('#loading-content').classList.remove('loading-content');
+}

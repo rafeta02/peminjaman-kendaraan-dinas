@@ -31,11 +31,11 @@ class StorePinjamRequest extends FormRequest
             ],
             'date_start' => [
                 'required',
-                'date_format:' . config('panel.date_format') . ' ' . config('panel.time_format'),
+                'date_format:' . config('panel.date_format') . ' ' . config('panel.clock_format'),
             ],
             'date_end' => [
                 'required',
-                'date_format:' . config('panel.date_format') . ' ' . config('panel.time_format'),
+                'date_format:' . config('panel.date_format') . ' ' . config('panel.clock_format'),
             ],
             'reason' => [
                 'string',

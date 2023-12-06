@@ -32,13 +32,21 @@ class Pinjam extends Model implements HasMedia
         'surat_izin',
         'laporan_kegiatan',
         'foto_kegiatan',
+        'status_peminjaman'
     ];
 
     public const STATUS_SELECT = [
         'diajukan' => 'Diajukan',
-        'diterima' => 'Diterima',
+        'diproses' => 'Diproses',
         'selesai'  => 'Selesai',
         'ditolak'  => 'Ditolak',
+    ];
+
+    public const STATUS_BACKGROUND = [
+        'diajukan' => 'primary',
+        'diproses' => 'warning',
+        'selesai'  => 'danger',
+        'ditolak'  => 'dark',
     ];
 
     protected $fillable = [
@@ -77,22 +85,22 @@ class Pinjam extends Model implements HasMedia
 
     public function getDateStartAttribute($value)
     {
-        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.clock_format')) : null;
     }
 
     public function setDateStartAttribute($value)
     {
-        $this->attributes['date_start'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s') : null;
+        $this->attributes['date_start'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.clock_format'), $value)->format('Y-m-d H:i:s') : null;
     }
 
     public function getDateEndAttribute($value)
     {
-        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.clock_format')) : null;
     }
 
     public function setDateEndAttribute($value)
     {
-        $this->attributes['date_end'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s') : null;
+        $this->attributes['date_end'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.clock_format'), $value)->format('Y-m-d H:i:s') : null;
     }
 
     public function borrowed_by()
@@ -135,6 +143,32 @@ class Pinjam extends Model implements HasMedia
         });
 
         return $files;
+    }
+
+    public function getWaktuPeminjamanAttribute()
+    {
+        $date_start = Carbon::parse($this->attributes['date_start'])->format('d M Y H:i');
+        $date_end = Carbon::parse($this->attributes['date_end'])->format('d M Y H:i');
+        return $date_start. ' - '. $date_end;
+    }
+
+    public function getTanggalPengajuanAttribute()
+    {
+        return Carbon::parse($this->attributes['created_at'])->format('d F Y');
+    }
+
+    public function getStatusPeminjamanAttribute()
+    {
+        if ($this->status == 'diproses') {
+            if (Carbon::parse($this->date_end)->isPast()) {
+                if ($this->laporan_kegiatan->count() > 0 && $this->foto_kegiatan->count() > 0) {
+                    return 'Selesai';
+                }
+                return 'Belum Upload Laporan';
+            }
+            return 'Diproses';
+        }
+        return Pinjam::STATUS_SELECT[$this->status];
     }
 
     public function created_by()

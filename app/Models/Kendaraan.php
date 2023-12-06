@@ -7,19 +7,24 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Cviebrock\EloquentSluggable\Sluggable;
+
 
 class Kendaraan extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia, Auditable, HasFactory;
+    use SoftDeletes, InteractsWithMedia, Auditable, HasFactory, Sluggable;
 
     public $table = 'kendaraans';
 
     protected $appends = [
         'photo',
         'gallery',
+        'no_pol',
+        'nama'
     ];
 
     protected $dates = [
@@ -38,6 +43,15 @@ class Kendaraan extends Model implements HasMedia
         'updated_at',
         'deleted_at',
     ];
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'type'
+            ]
+        ];
+    }
 
     protected function serializeDate(DateTimeInterface $date)
     {
@@ -72,5 +86,18 @@ class Kendaraan extends Model implements HasMedia
         });
 
         return $files;
+    }
+
+    public function getNoPolAttribute()
+    {
+        preg_match_all("/[A-Z]+|\d+/", $this->attributes['plat_no'], $matches);
+        return implode('-', $matches[0]);
+    }
+
+    public function getNamaAttribute()
+    {
+        preg_match_all("/[A-Z]+|\d+/", $this->attributes['plat_no'], $matches);
+        $no_pol = implode('-', $matches[0]);
+        return $no_pol. ' - '. Str::title($this->attributes['type']);
     }
 }

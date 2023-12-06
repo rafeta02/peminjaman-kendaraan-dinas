@@ -3,86 +3,90 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            @can('kendaraan_create')
-                <div style="margin-bottom: 10px;" class="row">
-                    <div class="col-lg-12">
-                        <a class="btn btn-success" href="{{ route('frontend.kendaraans.create') }}">
-                            {{ trans('global.add') }} {{ trans('cruds.kendaraan.title_singular') }}
-                        </a>
-                        <button class="btn btn-warning" data-toggle="modal" data-target="#csvImportModal">
-                            {{ trans('global.app_csvImport') }}
-                        </button>
-                        @include('csvImport.modal', ['model' => 'Kendaraan', 'route' => 'admin.kendaraans.parseCsvImport'])
-                    </div>
-                </div>
-            @endcan
             <div class="card">
                 <div class="card-header">
-                    {{ trans('cruds.kendaraan.title_singular') }} {{ trans('global.list') }}
+                    {{ trans('global.list') }} {{ trans('cruds.kendaraan.title_singular') }} 
                 </div>
-
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class=" table table-bordered table-striped table-hover datatable datatable-Kendaraan">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        {{ trans('cruds.kendaraan.fields.plat_no') }}
-                                    </th>
-                                    <th>
-                                        {{ trans('cruds.kendaraan.fields.type') }}
-                                    </th>
-                                    <th>
-                                        {{ trans('cruds.kendaraan.fields.capacity') }}
-                                    </th>
-                                    <th>
-                                        &nbsp;
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($kendaraans as $key => $kendaraan)
-                                    <tr data-entry-id="{{ $kendaraan->id }}">
-                                        <td>
-                                            {{ $kendaraan->plat_no ?? '' }}
-                                        </td>
-                                        <td>
-                                            {{ $kendaraan->type ?? '' }}
-                                        </td>
-                                        <td>
-                                            {{ $kendaraan->capacity ?? '' }}
-                                        </td>
-                                        <td>
-                                            @can('kendaraan_show')
-                                                <a class="btn btn-xs btn-primary" href="{{ route('frontend.kendaraans.show', $kendaraan->id) }}">
-                                                    {{ trans('global.view') }}
-                                                </a>
-                                            @endcan
+                    <form method="GET" action="{{ route("frontend.kendaraans.index") }}" enctype="multipart/form-data">
+                        <div class="row mb-5">
+                            <div class="col row">
+                                <div class="col-12">
+                                    <div class="form-group mb-0">
+                                        <label class="required" for="type">{{ trans('cruds.kendaraan.fields.type') }}</label>
+                                        <input class="form-control" type="text" name="type" id="type" value="{{ old('type', $type) }}" required>
+                                        @if($errors->has('type'))
+                                            <div class="invalid-feedback">
+                                                {{ $errors->first('type') }}
+                                            </div>
+                                        @endif
+                                        <span class="help-block">{{ trans('cruds.kendaraan.fields.type_helper') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+            
+                            <div class="col-auto align-self-end">
+                                <button type="submit" class="btn btn-primary">Cari</button>
+                                <a href="{{ route('frontend.kendaraans.index') }}" class="btn btn-danger">Reset</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach($kendaraans as $key => $kendaraan)
+                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                <div class="card mb-3">
+                                    <div id="carouselExample{{ $key }}" class="carousel slide carousel-fade" data-ride="carousel">
+                                        <div class="carousel-inner">
+                                            {{-- @if(count($kendaraan->gallery) > 0)
+                                                @foreach ($kendaraan->gallery as $media)
+                                                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                                        <img class="d-block w-100" src="{{ $media->getFullUrl() }}">
+                                                    </div>
+                                                @endforeach
+                                            @else --}}
+                                            <div class="carousel-item active">
+                                                <img class="d-block w-100" src="{{ asset('img/empty-room.jpg') }}">
+                                            </div>
+                                            {{-- @endif --}}
+                                        </div>
+                                        <a class="carousel-control-prev" href="#carouselExample{{ $key }}" role="button" data-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="sr-only">Previous</span>
+                                        </a>
+                                        <a class="carousel-control-next" href="#carouselExample{{ $key }}" role="button" data-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="sr-only">Next</span>
+                                        </a>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $kendaraan->nama ?? '' }}</h5>
+                                        <p class="card-text">{{ $kendaraan->description ?? '' }}</p>
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item text-center"><b>Kapasitas : {{ $kendaraan->capacity ?? '' }} Orang</b></li>
+                                        <li class="list-group-item">
+                                            <a class="btn btn-md btn-block btn-success" href="{{ route('frontend.kendaraans.calender', ['kendaraan' => $kendaraan->slug]) }}">
+                                                Cek Jadwal
+                                            </a>
+                                            <a class="btn btn-md btn-block btn-warning" href="{{ route('frontend.pinjams.create', ['kendaraan' => $kendaraan->slug]) }}">
+                                                Ajukan Peminjaman
+                                            </a>
+                                        </li>
+                                        <li class="list-group-item">
 
-                                            @can('kendaraan_edit')
-                                                <a class="btn btn-xs btn-info" href="{{ route('frontend.kendaraans.edit', $kendaraan->id) }}">
-                                                    {{ trans('global.edit') }}
-                                                </a>
-                                            @endcan
-
-                                            @can('kendaraan_delete')
-                                                <form action="{{ route('frontend.kendaraans.destroy', $kendaraan->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
-                                                </form>
-                                            @endcan
-
-                                        </td>
-
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div class="d-flex mt-3">
+            {!! $kendaraans->links() !!}
         </div>
     </div>
 </div>
@@ -90,50 +94,5 @@
 @section('scripts')
 @parent
 <script>
-    $(function () {
-  let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-@can('kendaraan_delete')
-  let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
-  let deleteButton = {
-    text: deleteButtonTrans,
-    url: "{{ route('frontend.kendaraans.massDestroy') }}",
-    className: 'btn-danger',
-    action: function (e, dt, node, config) {
-      var ids = $.map(dt.rows({ selected: true }).nodes(), function (entry) {
-          return $(entry).data('entry-id')
-      });
-
-      if (ids.length === 0) {
-        alert('{{ trans('global.datatables.zero_selected') }}')
-
-        return
-      }
-
-      if (confirm('{{ trans('global.areYouSure') }}')) {
-        $.ajax({
-          headers: {'x-csrf-token': _token},
-          method: 'POST',
-          url: config.url,
-          data: { ids: ids, _method: 'DELETE' }})
-          .done(function () { location.reload() })
-      }
-    }
-  }
-  dtButtons.push(deleteButton)
-@endcan
-
-  $.extend(true, $.fn.dataTable.defaults, {
-    orderCellsTop: true,
-    order: [[ 1, 'asc' ]],
-    pageLength: 25,
-  });
-  let table = $('.datatable-Kendaraan:not(.ajaxTable)').DataTable({ buttons: dtButtons })
-  $('a[data-toggle="tab"]').on('shown.bs.tab click', function(e){
-      $($.fn.dataTable.tables(true)).DataTable()
-          .columns.adjust();
-  });
-  
-})
-
 </script>
 @endsection

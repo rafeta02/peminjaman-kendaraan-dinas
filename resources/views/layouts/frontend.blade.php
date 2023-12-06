@@ -36,7 +36,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                    Aplikasi Peminjaman Kendaraan Dinas
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -47,9 +47,19 @@
                     <ul class="navbar-nav mr-auto">
                         @guest
                         @else
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" href="{{ route('frontend.home') }}">
                                     {{ __('Dashboard') }}
+                                </a>
+                            </li> --}}
+                            {{-- <li class="nav-item">
+                                <a class="nav-link" href="{{ route('frontend.kendaraans.index') }}">
+                                    {{ trans('cruds.kendaraan.title') }}
+                                </a>
+                            </li> --}}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('frontend.pinjams.index') }}">
+                                    {{ trans('cruds.pinjam.title') }}
                                 </a>
                             </li>
                         @endguest
@@ -76,57 +86,6 @@
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
 
                                     <a class="dropdown-item" href="{{ route('frontend.profile.index') }}">{{ __('My profile') }}</a>
-
-                                    @can('user_management_access')
-                                        <a class="dropdown-item disabled" href="#">
-                                            {{ trans('cruds.userManagement.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('permission_access')
-                                        <a class="dropdown-item ml-3" href="{{ route('frontend.permissions.index') }}">
-                                            {{ trans('cruds.permission.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('role_access')
-                                        <a class="dropdown-item ml-3" href="{{ route('frontend.roles.index') }}">
-                                            {{ trans('cruds.role.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('user_access')
-                                        <a class="dropdown-item ml-3" href="{{ route('frontend.users.index') }}">
-                                            {{ trans('cruds.user.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('log_pinjam_access')
-                                        <a class="dropdown-item ml-3" href="{{ route('frontend.log-pinjams.index') }}">
-                                            {{ trans('cruds.logPinjam.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('master_access')
-                                        <a class="dropdown-item disabled" href="#">
-                                            {{ trans('cruds.master.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('sopir_access')
-                                        <a class="dropdown-item ml-3" href="{{ route('frontend.sopirs.index') }}">
-                                            {{ trans('cruds.sopir.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('kendaraan_access')
-                                        <a class="dropdown-item ml-3" href="{{ route('frontend.kendaraans.index') }}">
-                                            {{ trans('cruds.kendaraan.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('pinjam_access')
-                                        <a class="dropdown-item" href="{{ route('frontend.pinjams.index') }}">
-                                            {{ trans('cruds.pinjam.title') }}
-                                        </a>
-                                    @endcan
-                                    @can('user_alert_access')
-                                        <a class="dropdown-item" href="{{ route('frontend.user-alerts.index') }}">
-                                            {{ trans('cruds.userAlert.title') }}
-                                        </a>
-                                    @endcan
 
                                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

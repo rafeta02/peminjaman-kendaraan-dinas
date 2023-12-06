@@ -72,6 +72,13 @@
             <p class="mb-1">
 
             </p>
+            <hr>
+            <div class="text-center" class="mb-4">
+                <h5 class="mb-4">Atau login dengan:</h5>
+                <a href="#">
+                    <img src="{{ asset('img/sso.jpg') }}" style="height:75px; width:auto">
+                </a>
+            </div>
         </div>
         <!-- /.login-card-body -->
     </div>

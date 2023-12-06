@@ -46,7 +46,7 @@ class KendaraanController extends Controller
             });
 
             $table->editColumn('plat_no', function ($row) {
-                return $row->plat_no ? $row->plat_no : '';
+                return $row->plat_no ? $row->no_pol : '';
             });
             $table->editColumn('type', function ($row) {
                 return $row->type ? $row->type : '';
@@ -165,5 +165,26 @@ class KendaraanController extends Controller
         $media         = $model->addMediaFromRequest('upload')->toMediaCollection('ck-media');
 
         return response()->json(['id' => $media->id, 'url' => $media->getUrl()], Response::HTTP_CREATED);
+    }
+
+    public function getKendaraan(Request $request)
+    {
+        $keywords = $request->input('keywords');
+        $kendaraans = Kendaraan::where(function($q) use ($keywords) {
+                    $q->where('plat_no', 'LIKE', "%{$keywords}%")
+                    ->orWhere('type', 'LIKE', "%{$keywords}%");
+                })
+                ->orderBy('plat_no', 'ASC')
+                ->get();
+
+        foreach ($kendaraans as $kendaraan) {
+            $formattedProducts[] = [
+                'id' => $kendaraan->id,
+                'text' => $kendaraan->nama,
+                'deskripsi' => $kendaraan->description,
+            ];
+        }
+
+        return response()->json($formattedProducts);
     }
 }

@@ -22,7 +22,7 @@ class LogPinjam extends Model
 
     public const JENIS_SELECT = [
         'diajukan'  => 'Diajukan',
-        'disetujui' => 'Disetujui',
+        'diproses' => 'diproses',
         'ditolak'   => 'Ditolak',
         'selesai'   => 'Selesai',
     ];
