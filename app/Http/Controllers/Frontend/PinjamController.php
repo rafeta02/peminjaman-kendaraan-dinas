@@ -26,14 +26,13 @@ class PinjamController extends Controller
 
     public function index()
     {
-        $pinjams = Pinjam::with(['kendaraan', 'borrowed_by', 'processed_by', 'sopir', 'created_by', 'media'])->get();
+        $pinjams = Pinjam::with(['kendaraan', 'media'])->latest()->get();
 
         return view('frontend.pinjams.index', compact('pinjams'));
     }
 
     public function create(Request $request)
     {
-
         $kendaraan = Kendaraan::where('slug', $request->kendaraan)->first();
 
         if ($request->date) {

@@ -258,6 +258,7 @@ class PinjamController extends Controller
             $data = Pinjam::find($request->id);
             $data->status = 'diproses';
             $data->status_text = 'Peminjaman kendaraan "'.$data->kendaraan->nama .'" Disetujui oleh "'. auth()->user()->name .'"';
+            $data->processed_by_id = auth()->user()->id;
 
             LogPinjam::create([
                 'peminjaman_id' => $data->id,
@@ -289,6 +290,7 @@ class PinjamController extends Controller
             $data = Pinjam::find($id);
             $data->status = 'ditolak';
             $data->status_text = 'Ditolak dengan alasan : "'. $reason .'"';
+            $data->processed_by_id = auth()->user()->id;
 
             LogPinjam::create([
                 'peminjaman_id' => $data->id,
