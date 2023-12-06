@@ -5,7 +5,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    {{ trans('global.list') }} {{ trans('cruds.kendaraan.title_singular') }} 
+                    {{ trans('global.list') }} {{ trans('cruds.kendaraan.title_singular') }}
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route("frontend.kendaraans.index") }}" enctype="multipart/form-data">
@@ -24,7 +24,7 @@
                                     </div>
                                 </div>
                             </div>
-            
+
                             <div class="col-auto align-self-end">
                                 <button type="submit" class="btn btn-primary">Cari</button>
                                 <a href="{{ route('frontend.kendaraans.index') }}" class="btn btn-danger">Reset</a>
@@ -39,17 +39,17 @@
                                 <div class="card mb-3">
                                     <div id="carouselExample{{ $key }}" class="carousel slide carousel-fade" data-ride="carousel">
                                         <div class="carousel-inner">
-                                            {{-- @if(count($kendaraan->gallery) > 0)
+                                            @if(count($kendaraan->gallery) > 0)
                                                 @foreach ($kendaraan->gallery as $media)
                                                     <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                                         <img class="d-block w-100" src="{{ $media->getFullUrl() }}">
                                                     </div>
                                                 @endforeach
-                                            @else --}}
-                                            <div class="carousel-item active">
-                                                <img class="d-block w-100" src="{{ asset('img/empty-room.jpg') }}">
-                                            </div>
-                                            {{-- @endif --}}
+                                            @else
+                                                <div class="carousel-item active">
+                                                    <img class="d-block w-100" src="{{ asset('img/empty-room.jpg') }}">
+                                                </div>
+                                            @endif
                                         </div>
                                         <a class="carousel-control-prev" href="#carouselExample{{ $key }}" role="button" data-slide="prev">
                                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
