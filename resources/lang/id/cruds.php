@@ -189,6 +189,8 @@ return [
             'surat_permohonan_helper' => ' ',
             'surat_izin'              => 'Surat Izin Kegiatan',
             'surat_izin_helper'       => ' ',
+            'surat_balasan'           => 'Surat Balasan',
+            'surat_balasan_helper'    => ' ',
             'laporan_kegiatan'        => 'Laporan Kegiatan',
             'laporan_kegiatan_helper' => ' ',
             'foto_kegiatan'           => 'Foto Kegiatan',

@@ -48,9 +48,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('pinjams/ckmedia', 'PinjamController@storeCKEditorImages')->name('pinjams.storeCKEditorImages');
     Route::post('pinjams/parse-csv-import', 'PinjamController@parseCsvImport')->name('pinjams.parseCsvImport');
     Route::post('pinjams/process-csv-import', 'PinjamController@processCsvImport')->name('pinjams.processCsvImport');
-    Route::post('pinjams/accept', 'PinjamController@accept')->name('pinjams.accept');
+    Route::post('pinjams/accept-booking', 'PinjamController@acceptBooking')->name('pinjams.acceptBooking');
+    Route::post('pinjams/accept-pinjam', 'PinjamController@acceptPinjam')->name('pinjams.acceptPinjam');
     Route::post('pinjams/reject', 'PinjamController@reject')->name('pinjams.reject');
     Route::post('pinjams/save-driver', 'PinjamController@saveDriver')->name('pinjams.saveDriver');
+    Route::get('pinjams/{pinjam}/balasan', 'PinjamController@balasan')->name('pinjams.balasan');
+    Route::put('pinjams/balasan/{pinjam}', 'PinjamController@storeBalasan')->name('pinjams.storeBalasan');
     Route::resource('pinjams', 'PinjamController');
 
     // Log Pinjam
@@ -69,7 +72,7 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
     }
 });
 Route::group(['as' => 'frontend.', 'namespace' => 'Frontend', 'middleware' => ['auth']], function () {
-    
+
     // Pinjam
     Route::delete('pinjams/destroy', 'PinjamController@massDestroy')->name('pinjams.massDestroy');
     Route::post('pinjams/media', 'PinjamController@storeMedia')->name('pinjams.storeMedia');
@@ -77,6 +80,10 @@ Route::group(['as' => 'frontend.', 'namespace' => 'Frontend', 'middleware' => ['
     Route::get('pinjams/get-kendaraan', 'PinjamController@getKendaraan')->name('pinjams.getKendaraan');
     Route::get('pinjams/{pinjam}/laporan', 'PinjamController@laporan')->name('pinjams.laporan');
     Route::put('pinjams/upload-laporan/{pinjam}', 'PinjamController@uploadLaporan')->name('pinjams.uploadLaporan');
+    Route::get('pinjams/book', 'PinjamController@book')->name('pinjams.book');
+    Route::post('pinjams/book', 'PinjamController@storeBook')->name('pinjams.storeBook');
+    Route::get('pinjams/{pinjam}/permohonan', 'PinjamController@permohonan')->name('pinjams.permohonan');
+    Route::put('pinjams/upload-permohonan/{pinjam}', 'PinjamController@uploadPermohonan')->name('pinjams.uploadPermohonan');
     Route::resource('pinjams', 'PinjamController');
 
 

@@ -30,23 +30,35 @@ class Pinjam extends Model implements HasMedia
     protected $appends = [
         'surat_permohonan',
         'surat_izin',
+        'surat_balasan',
         'laporan_kegiatan',
         'foto_kegiatan',
         'status_peminjaman'
     ];
 
     public const STATUS_SELECT = [
-        'diajukan' => 'Diajukan',
-        'diproses' => 'Diproses',
+        'pesan' => 'Diajukan Pemesanan',
+        'terpesan' => 'Telah Terpesan',
+        'pinjam' => 'Diajukan Peminjaman',
+        'disetujui' => 'Peminjaman Disetujui',
         'selesai'  => 'Selesai',
         'ditolak'  => 'Ditolak',
     ];
 
     public const STATUS_BACKGROUND = [
-        'diajukan' => 'primary',
-        'diproses' => 'warning',
-        'selesai'  => 'danger',
+        'pesan' => 'info',
+        'terpesan' => 'primary',
+        'pinjam' => 'success',
+        'disetujui' => 'warning',
+        'selesai'  => 'secondary',
         'ditolak'  => 'dark',
+    ];
+
+    public const STATUS_CALENDER_SELECT = [
+        'booked'   => 'Booked',
+        'borrowed' => 'Borrowed',
+        'rejected' => 'Rejected',
+        'canceled' => 'Canceled',
     ];
 
     protected $fillable = [
@@ -126,6 +138,11 @@ class Pinjam extends Model implements HasMedia
     public function getSuratIzinAttribute()
     {
         return $this->getMedia('surat_izin')->last();
+    }
+
+    public function getSuratBalasanAttribute()
+    {
+        return $this->getMedia('surat_balasan')->last();
     }
 
     public function getLaporanKegiatanAttribute()

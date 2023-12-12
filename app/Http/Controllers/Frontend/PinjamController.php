@@ -8,6 +8,9 @@ use App\Http\Controllers\Traits\MediaUploadingTrait;
 use App\Http\Requests\MassDestroyPinjamRequest;
 use App\Http\Requests\StorePinjamRequest;
 use App\Http\Requests\UpdatePinjamRequest;
+use App\Http\Requests\UpdateSuratPinjamRequest;
+use App\Http\Requests\UpdateLaporanPinjamRequest;
+use App\Http\Requests\BookPinjamRequest;
 use App\Models\Kendaraan;
 use App\Models\Pinjam;
 use App\Models\LogPinjam;
@@ -46,8 +49,8 @@ class PinjamController extends Controller
     {
         $kendaraan = Kendaraan::find($request->kendaraan_id);
 
-        $request->request->add(['status' => 'diajukan']);
-        $request->request->add(['status_text' => 'Diajukan oleh "' . $request->name .' ('. $request->no_wa .')" peminjaman kendaraan "'.$kendaraan->nama .'"']);
+        $request->request->add(['status' => 'pinjam']);
+        $request->request->add(['status_text' => 'Peminjaman Diajukan oleh "' . $request->name .' ('. $request->no_wa .')" Untuk kendaraan "'.$kendaraan->nama .'"']);
         $request->request->add(['borrowed_by_id' => auth()->user()->id]);
 
         DB::beginTransaction();
@@ -70,8 +73,8 @@ class PinjamController extends Controller
                 'peminjaman_id' => $pinjam->id,
                 'kendaraan_id' => $pinjam->kendaraan_id,
                 'peminjam_id' => $pinjam->borrowed_by_id,
-                'jenis' => 'diajukan',
-                'log' => 'Peminjaman kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
+                'jenis' => 'pinjam',
+                'log' => 'Peminjaman Kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
             ]);
 
             DB::commit();
@@ -84,6 +87,90 @@ class PinjamController extends Controller
 
             return redirect()->back()->with('error-message', $e->getMessage())->withInput();
         }
+
+        return redirect()->route('frontend.pinjams.index');
+    }
+
+    public function book(Request $request)
+    {
+        $kendaraan = Kendaraan::where('slug', $request->kendaraan)->first();
+
+        if ($request->date) {
+            session()->flashInput(['date_start' => Carbon::parse($request->date)->format('d-m-Y H:i')]);
+        }
+
+        return view('frontend.pinjams.book', compact('kendaraan'));
+    }
+
+    public function storeBook(BookPinjamRequest $request)
+    {
+        $kendaraan = Kendaraan::find($request->kendaraan_id);
+
+        $request->request->add(['status' => 'pesan']);
+        $request->request->add(['status_text' => 'Pemesanan Peminjaman Diajukan Oleh "' . $request->name .' ('. $request->no_wa .')" Untuk Kendaraan "'.$kendaraan->nama .'"']);
+        $request->request->add(['borrowed_by_id' => auth()->user()->id]);
+
+        DB::beginTransaction();
+        try {
+            $pinjam = Pinjam::create($request->all());
+
+            LogPinjam::create([
+                'peminjaman_id' => $pinjam->id,
+                'kendaraan_id' => $pinjam->kendaraan_id,
+                'peminjam_id' => $pinjam->borrowed_by_id,
+                'jenis' => 'pesan',
+                'log' => 'Pemesanan Peminjaman Kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
+            ]);
+
+            DB::commit();
+
+            Alert::success('Success', 'Pemesanan Peminjaman Kendaraan Berhasil Diajukan');
+
+            return redirect()->route('frontend.pinjams.index');
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return redirect()->back()->with('error-message', $e->getMessage())->withInput();
+        }
+
+        return redirect()->route('frontend.pinjams.index');
+    }
+
+    public function permohonan(Pinjam $pinjam)
+    {
+
+        $pinjam->load('kendaraan');
+
+        return view('frontend.pinjams.permohonan', compact('pinjam'));
+    }
+
+    public function uploadPermohonan(UpdateSuratPinjamRequest $request, Pinjam $pinjam)
+    {
+        $pinjam->update($request->all());
+
+        if ($request->input('surat_permohonan', false)) {
+            if (! $pinjam->surat_permohonan || $request->input('surat_permohonan') !== $pinjam->surat_permohonan->file_name) {
+                if ($pinjam->surat_permohonan) {
+                    $pinjam->surat_permohonan->delete();
+                }
+                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_permohonan'))))->toMediaCollection('surat_permohonan');
+            }
+        } elseif ($pinjam->surat_permohonan) {
+            $pinjam->surat_permohonan->delete();
+        }
+
+        if ($request->input('surat_izin', false)) {
+            if (! $pinjam->surat_izin || $request->input('surat_izin') !== $pinjam->surat_izin->file_name) {
+                if ($pinjam->surat_izin) {
+                    $pinjam->surat_izin->delete();
+                }
+                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_izin'))))->toMediaCollection('surat_izin');
+            }
+        } elseif ($pinjam->surat_izin) {
+            $pinjam->surat_izin->delete();
+        }
+
+        Alert::success('Success', 'Surat Permohonan Peminjaman Kendaraan Berhasil Disimpan');
 
         return redirect()->route('frontend.pinjams.index');
     }
@@ -122,7 +209,7 @@ class PinjamController extends Controller
             $pinjam->surat_izin->delete();
         }
 
-        Alert::success('Success', 'Peminjaman Kendaraan Berhasil Disimpan');
+        Alert::success('Success', 'Pengajuan Peminjaman Kendaraan Berhasil Disimpan');
 
         return redirect()->route('frontend.pinjams.index');
     }
@@ -132,7 +219,7 @@ class PinjamController extends Controller
         return view('frontend.pinjams.lpj', compact('pinjam'));
     }
 
-    public function uploadLaporan(Request $request, Pinjam $pinjam)
+    public function uploadLaporan(UpdateLaporanPinjamRequest $request, Pinjam $pinjam)
     {
         $pinjam->update([
             'laporan_kegiatan' => $request->laporan_kegiatan,

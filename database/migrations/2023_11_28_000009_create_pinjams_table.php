@@ -16,6 +16,7 @@ class CreatePinjamsTable extends Migration
             $table->datetime('date_end');
             $table->string('reason');
             $table->string('status')->nullable();
+            $table->string('status_calender')->nullable();
             $table->longText('status_text')->nullable();
             $table->timestamps();
             $table->softDeletes();

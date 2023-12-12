@@ -145,12 +145,12 @@ $(function () {
         }
     });
 
-    $('body').on('click', '.button-accept', function () {
+    $('body').on('click', '.button-accept-booking', function () {
         event.preventDefault();
         const id = $(this).data('id');
         swal({
-            title: 'Apakah pengajuan akan diterima ?',
-            text: 'Pengajuan peminjaman kendaraan akan diterima',
+            title: 'Apakah pengajuan pemesanan akan diterima ?',
+            text: 'Pengajuan pemesanan kendaraan akan diterima',
             icon: 'warning',
             buttons: ["Cancel", "Yes!"],
             showSpinner: true
@@ -159,7 +159,7 @@ $(function () {
                 showLoading();
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('admin.pinjams.accept') }}",
+                    url: "{{ route('admin.pinjams.acceptBooking') }}",
                     data: {
                         id: id
                     },
@@ -176,6 +176,39 @@ $(function () {
             }
         });
     });
+
+    $('body').on('click', '.button-accept-pinjam', function () {
+        event.preventDefault();
+        const id = $(this).data('id');
+        swal({
+            title: 'Apakah pengajuan akan diterima ?',
+            text: 'Pengajuan peminjaman kendaraan akan diterima',
+            icon: 'warning',
+            buttons: ["Cancel", "Yes!"],
+            showSpinner: true
+        }).then(function(value) {
+            if (value) {
+                showLoading();
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('admin.pinjams.acceptPinjam') }}",
+                    data: {
+                        id: id
+                    },
+                    success: function (response) {
+                        hideLoading();
+                        if (response.status == 'success') {
+                            swal("Success", response.message, "success");
+                            table.ajax.reload();
+                        } else {
+                            swal("Warning!", response.message, 'error');
+                        }
+                    }
+                });
+            }
+        });
+    });
+
 
     $('body').on('click', '.button-reject', function () {
         event.preventDefault();

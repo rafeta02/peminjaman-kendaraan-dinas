@@ -6,44 +6,49 @@
 
             <div class="card">
                 <div class="card-header">
-                    Upload Laporan Pertanggungjawaban
+                    Upload Surat Permohonan
                 </div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route("frontend.pinjams.uploadLaporan", [$pinjam->id]) }}" enctype="multipart/form-data">
+                    @if (session()->has('error-message'))
+                        <p class="text-danger">
+                            {{session()->get('error-message')}}
+                        </p>
+                    @endif
+
+                    <form method="POST" action="{{ route("frontend.pinjams.uploadPermohonan", [$pinjam->id]) }}" enctype="multipart/form-data">
                         @method('PUT')
                         @csrf
-
                         <div class="row">
-                            <div class="col-12">
+                            <div class="col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label class="required" for="laporan_kegiatan">{{ trans('cruds.pinjam.fields.laporan_kegiatan') }} <small>(PDF/Word)</small></label>
-                                    <div class="needsclick dropzone" id="laporan_kegiatan-dropzone">
+                                    <label class="required" for="surat_permohonan">{{ trans('cruds.pinjam.fields.surat_permohonan') }} <small>(PDF/Word)</small></label>
+                                    <div class="needsclick dropzone" id="surat_permohonan-dropzone">
                                     </div>
-                                    @if($errors->has('laporan_kegiatan'))
+                                    @if($errors->has('surat_permohonan'))
                                         <div class="invalid-feedback">
-                                            {{ $errors->first('laporan_kegiatan') }}
+                                            {{ $errors->first('surat_permohonan') }}
                                         </div>
                                     @endif
-                                    <span class="help-block">{{ trans('cruds.pinjam.fields.laporan_kegiatan_helper') }}</span>
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.surat_permohonan_helper') }}</span>
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label class="required" for="foto_kegiatan">{{ trans('cruds.pinjam.fields.foto_kegiatan') }} <small>(Multiple Images)</small></label>
-                                    <div class="needsclick dropzone" id="foto_kegiatan-dropzone">
+                                    <label class="required" for="surat_izin">{{ trans('cruds.pinjam.fields.surat_izin') }} <small>(PDF/Word)</small></label>
+                                    <div class="needsclick dropzone" id="surat_izin-dropzone">
                                     </div>
-                                    @if($errors->has('foto_kegiatan'))
+                                    @if($errors->has('surat_izin'))
                                         <div class="invalid-feedback">
-                                            {{ $errors->first('foto_kegiatan') }}
+                                            {{ $errors->first('surat_izin') }}
                                         </div>
                                     @endif
-                                    <span class="help-block">{{ trans('cruds.pinjam.fields.foto_kegiatan_helper') }}</span>
+                                    <span class="help-block">{{ trans('cruds.pinjam.fields.surat_izin_helper') }}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-12 text-left">
+                        <div class="row mt-5">
+                            <div class="col-12 text-center">
                                 <div class="form-group">
                                     <button class="btn btn-danger" type="submit">
                                         {{ trans('global.save') }}
@@ -62,10 +67,10 @@
 
 @section('scripts')
 <script>
-    var uploadedLaporanKegiatanMap = {}
-Dropzone.options.laporanKegiatanDropzone = {
+    Dropzone.options.suratPermohonanDropzone = {
     url: '{{ route('frontend.pinjams.storeMedia') }}',
     maxFilesize: 5, // MB
+    maxFiles: 1,
     acceptedFiles: "application/pdf,.doc,.docx",
     addRemoveLinks: true,
     headers: {
@@ -75,29 +80,23 @@ Dropzone.options.laporanKegiatanDropzone = {
       size: 5
     },
     success: function (file, response) {
-      $('form').append('<input type="hidden" name="laporan_kegiatan[]" value="' + response.name + '">')
-      uploadedLaporanKegiatanMap[file.name] = response.name
+      $('form').find('input[name="surat_permohonan"]').remove()
+      $('form').append('<input type="hidden" name="surat_permohonan" value="' + response.name + '">')
     },
     removedfile: function (file) {
       file.previewElement.remove()
-      var name = ''
-      if (typeof file.file_name !== 'undefined') {
-        name = file.file_name
-      } else {
-        name = uploadedLaporanKegiatanMap[file.name]
+      if (file.status !== 'error') {
+        $('form').find('input[name="surat_permohonan"]').remove()
+        this.options.maxFiles = this.options.maxFiles + 1
       }
-      $('form').find('input[name="laporan_kegiatan[]"][value="' + name + '"]').remove()
     },
     init: function () {
-@if(isset($pinjam) && $pinjam->laporan_kegiatan)
-          var files =
-            {!! json_encode($pinjam->laporan_kegiatan) !!}
-              for (var i in files) {
-              var file = files[i]
-              this.options.addedfile.call(this, file)
-              file.previewElement.classList.add('dz-complete')
-              $('form').append('<input type="hidden" name="laporan_kegiatan[]" value="' + file.file_name + '">')
-            }
+@if(isset($pinjam) && $pinjam->surat_permohonan)
+      var file = {!! json_encode($pinjam->surat_permohonan) !!}
+          this.options.addedfile.call(this, file)
+      file.previewElement.classList.add('dz-complete')
+      $('form').append('<input type="hidden" name="surat_permohonan" value="' + file.file_name + '">')
+      this.options.maxFiles = this.options.maxFiles - 1
 @endif
     },
      error: function (file, response) {
@@ -119,45 +118,36 @@ Dropzone.options.laporanKegiatanDropzone = {
 }
 </script>
 <script>
-    var uploadedFotoKegiatanMap = {}
-Dropzone.options.fotoKegiatanDropzone = {
+    Dropzone.options.suratIzinDropzone = {
     url: '{{ route('frontend.pinjams.storeMedia') }}',
-    maxFilesize: 2, // MB
-    acceptedFiles: '.jpeg,.jpg,.png,.gif',
+    maxFilesize: 5, // MB
+    maxFiles: 1,
+    acceptedFiles: "application/pdf,.doc,.docx",
     addRemoveLinks: true,
     headers: {
       'X-CSRF-TOKEN': "{{ csrf_token() }}"
     },
     params: {
-      size: 2,
-      width: 4096,
-      height: 4096
+      size: 5
     },
     success: function (file, response) {
-      $('form').append('<input type="hidden" name="foto_kegiatan[]" value="' + response.name + '">')
-      uploadedFotoKegiatanMap[file.name] = response.name
+      $('form').find('input[name="surat_izin"]').remove()
+      $('form').append('<input type="hidden" name="surat_izin" value="' + response.name + '">')
     },
     removedfile: function (file) {
-      console.log(file)
       file.previewElement.remove()
-      var name = ''
-      if (typeof file.file_name !== 'undefined') {
-        name = file.file_name
-      } else {
-        name = uploadedFotoKegiatanMap[file.name]
+      if (file.status !== 'error') {
+        $('form').find('input[name="surat_izin"]').remove()
+        this.options.maxFiles = this.options.maxFiles + 1
       }
-      $('form').find('input[name="foto_kegiatan[]"][value="' + name + '"]').remove()
     },
     init: function () {
-@if(isset($pinjam) && $pinjam->foto_kegiatan)
-      var files = {!! json_encode($pinjam->foto_kegiatan) !!}
-          for (var i in files) {
-          var file = files[i]
+@if(isset($pinjam) && $pinjam->surat_izin)
+      var file = {!! json_encode($pinjam->surat_izin) !!}
           this.options.addedfile.call(this, file)
-          this.options.thumbnail.call(this, file, file.preview ?? file.preview_url)
-          file.previewElement.classList.add('dz-complete')
-          $('form').append('<input type="hidden" name="foto_kegiatan[]" value="' + file.file_name + '">')
-        }
+      file.previewElement.classList.add('dz-complete')
+      $('form').append('<input type="hidden" name="surat_izin" value="' + file.file_name + '">')
+      this.options.maxFiles = this.options.maxFiles - 1
 @endif
     },
      error: function (file, response) {
@@ -177,6 +167,5 @@ Dropzone.options.fotoKegiatanDropzone = {
          return _results
      }
 }
-
 </script>
 @endsection

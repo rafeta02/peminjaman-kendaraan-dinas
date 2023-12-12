@@ -8,6 +8,7 @@ use App\Http\Controllers\Traits\MediaUploadingTrait;
 use App\Http\Requests\MassDestroyPinjamRequest;
 use App\Http\Requests\StorePinjamRequest;
 use App\Http\Requests\UpdatePinjamRequest;
+use App\Http\Requests\UpdateBalasanPinjamRequest;
 use App\Models\Kendaraan;
 use App\Models\Pinjam;
 use App\Models\LogPinjam;
@@ -55,16 +56,19 @@ class PinjamController extends Controller
                 return $row->reason ? $row->reason : '';
             });
             $table->editColumn('status', function ($row) {
-                if ($row->status == 'diajukan') {
-                    return '<span class="badge badge-primary">Diajukan Tanggal : '. $row->tanggal_pengajuan. '</span><br>
-                        <span class="badge badge-primary">Surat Permohonan : <b>'. ($row->surat_permohonan ? 'Ada' : 'Belum Upload'). '</b></span><br>
-                        <span class="badge badge-primary">Surat Ijin : <b>'. ($row->surat_izin ? 'Ada' : 'Belum Upload'). '</b></span>';
+                if ($row->status == 'pesan') {
+                    return '<span class="badge badge-info">Diajukan Pemesanan<br>Pada Tanggal : '. $row->tanggal_pengajuan. '</span>';
+                } else if ($row->status == 'terpesan') {
+                    return '<span class="badge badge-primary">Pemesanan Disetujui</span>';
+                } else if ($row->status == 'pinjam') {
+                    return '<span class="badge badge-success">Diajukan Peminjaman<br>Pada Tanggal : '. $row->tanggal_pengajuan. '</span>';
                 } else if ($row->status == 'ditolak') {
                     $arr = explode(' : ', $row->status_text);
                     return '<span class="badge badge-dark">'. $arr[0].'<br>'. $arr[1] .'</span>';
                 } else {
-                    $status = '<span class="badge badge-'.Pinjam::STATUS_BACKGROUND[$row->status].'">'.$row->status_peminjaman.'</span>';
-                    if ($row->status == 'diproses') {
+                    $status = '<span class="badge badge-'.Pinjam::STATUS_BACKGROUND[$row->status].'">'.$row->status_peminjaman.'</span><br>
+                    <span class="badge badge-warning">Surat Balasan : <b>'. ($row->surat_balasan ? 'Sudah Dikirim' : 'Belum Dikirim'). '</b></span>';
+                    if ($row->status == 'disetujui') {
                         $driver = '<br><span class="badge badge-warning">'.($row->sopir_id ? ('Sopir : '.$row->sopir->nama.'<br>No WA : ('.$row->sopir->no_wa.')') : 'Belum Pilih Sopir').'</span>';
                         return $status.' '.$driver;
                     }
@@ -100,8 +104,8 @@ class PinjamController extends Controller
     {
         $kendaraan = Kendaraan::find($request->kendaraan_id);
 
-        $request->request->add(['status' => 'diajukan']);
-        $request->request->add(['status_text' => 'Diajukan oleh "' . $request->name .' ('. $request->no_wa .')" peminjaman kendaraan "'.$kendaraan->nama .'"']);
+        $request->request->add(['status' => 'pinjam']);
+        $request->request->add(['status_text' => 'Peminjaman Diajukan oleh "' . $request->name .' ('. $request->no_wa .')" Untuk kendaraan "'.$kendaraan->nama .'"']);
         $request->request->add(['borrowed_by_id' => auth()->user()->id]);
 
         DB::beginTransaction();
@@ -124,8 +128,8 @@ class PinjamController extends Controller
                 'peminjaman_id' => $pinjam->id,
                 'kendaraan_id' => $pinjam->kendaraan_id,
                 'peminjam_id' => $pinjam->borrowed_by_id,
-                'jenis' => 'diajukan',
-                'log' => 'Peminjaman kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
+                'jenis' => 'pinjam',
+                'log' => 'Peminjaman Kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
             ]);
 
             DB::commit();
@@ -151,6 +155,33 @@ class PinjamController extends Controller
         $pinjam->load('kendaraan', 'borrowed_by', 'processed_by', 'sopir', 'created_by');
 
         return view('admin.pinjams.edit', compact('kendaraans', 'pinjam', 'sopirs'));
+    }
+
+    public function balasan(Pinjam $pinjam)
+    {
+        return view('admin.pinjams.balasan', compact('pinjam'));
+    }
+
+    public function storeBalasan(UpdateBalasanPinjamRequest $request, Pinjam $pinjam)
+    {
+        $pinjam->update([
+            'surat_balasan' => $request->surat_balasan,
+        ]);
+
+        if ($request->input('surat_balasan', false)) {
+            if (! $pinjam->surat_balasan || $request->input('surat_balasan') !== $pinjam->surat_balasan->file_name) {
+                if ($pinjam->surat_balasan) {
+                    $pinjam->surat_balasan->delete();
+                }
+                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_balasan'))))->toMediaCollection('surat_balasan');
+            }
+        } elseif ($pinjam->surat_balasan) {
+            $pinjam->surat_balasan->delete();
+        }
+
+        Alert::success('Success', 'Surat Balasan Berhasil Disimpan');
+
+        return redirect()->route('frontend.pinjams.index');
     }
 
     public function update(UpdatePinjamRequest $request, Pinjam $pinjam)
@@ -251,13 +282,14 @@ class PinjamController extends Controller
         return response()->json(['id' => $media->id, 'url' => $media->getUrl()], Response::HTTP_CREATED);
     }
 
-    public function accept(Request $request)
+    public function acceptBooking(Request $request)
     {
         DB::beginTransaction();
         try {
             $data = Pinjam::find($request->id);
-            $data->status = 'diproses';
-            $data->status_text = 'Peminjaman kendaraan "'.$data->kendaraan->nama .'" Disetujui oleh "'. auth()->user()->name .'"';
+            $data->status = 'terpesan';
+            $data->status_calender = 'booked';
+            $data->status_text = 'Pemesanan Peminjaman kendaraan "'.$data->kendaraan->nama .'" Disetujui oleh "'. auth()->user()->name .'"';
             $data->processed_by_id = auth()->user()->id;
 
             LogPinjam::create([
@@ -265,14 +297,44 @@ class PinjamController extends Controller
                 'kendaraan_id' => $data->kendaraan_id,
                 'peminjam_id' => $data->borrowed_by_id,
                 'jenis' => 'diproses',
-                'log' => 'Peminjaman kendaraan '. $data->kendaraan->nama. ' Disetujui oleh "'. auth()->user()->name .'"',
+                'log' => 'Pemesanan Peminjaman kendaraan '. $data->kendaraan->nama. ' Disetujui oleh "'. auth()->user()->name .'"',
             ]);
 
             $data->save();
 
             DB::commit();
 
-            return response()->json(['status' => 'success', 'message' => 'Pengajuan Peminjaman Berhasil Diterima']);
+            return response()->json(['status' => 'success', 'message' => 'Pengajuan Pemesanan Peminjaman Berhasil Diterima']);
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function acceptPinjam(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $data = Pinjam::find($request->id);
+            $data->status = 'disetujui';
+            $data->status_calender = 'borrowed';
+            $data->status_text = 'Peminjaman Kendaraan "'.$data->kendaraan->nama .'" Disetujui oleh "'. auth()->user()->name .'"';
+            $data->processed_by_id = auth()->user()->id;
+
+            LogPinjam::create([
+                'peminjaman_id' => $data->id,
+                'kendaraan_id' => $data->kendaraan_id,
+                'peminjam_id' => $data->borrowed_by_id,
+                'jenis' => 'disetujui',
+                'log' => 'Peminjaman Kendaraan '. $data->kendaraan->nama. ' Disetujui oleh "'. auth()->user()->name .'"',
+            ]);
+
+            $data->save();
+
+            DB::commit();
+
+            return response()->json(['status' => 'success', 'message' => 'Pengajuan Peminjaman Berhasil Disetujui']);
         } catch (\Exception $e) {
             DB::rollback();
 
@@ -288,8 +350,9 @@ class PinjamController extends Controller
         DB::beginTransaction();
         try {
             $data = Pinjam::find($id);
+            $text = $status->status == 'pesan' ? 'Pemesanan Peminjaman' : 'Peminjaman';
             $data->status = 'ditolak';
-            $data->status_text = 'Ditolak dengan alasan : "'. $reason .'"';
+            $data->status_text = $text. ' Ditolak dengan alasan : "'. $reason .'"';
             $data->processed_by_id = auth()->user()->id;
 
             LogPinjam::create([

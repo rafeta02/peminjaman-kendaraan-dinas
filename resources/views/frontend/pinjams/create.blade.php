@@ -100,7 +100,7 @@
                             </div>
                             <div class="col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="surat_permohonan">{{ trans('cruds.pinjam.fields.surat_permohonan') }}</label>
+                                    <label class="required" for="surat_permohonan">{{ trans('cruds.pinjam.fields.surat_permohonan') }} <small>(PDF/Word)</small></label>
                                     <div class="needsclick dropzone" id="surat_permohonan-dropzone">
                                     </div>
                                     @if($errors->has('surat_permohonan'))
@@ -113,7 +113,7 @@
                             </div>
                             <div class="col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="surat_izin">{{ trans('cruds.pinjam.fields.surat_izin') }}</label>
+                                    <label class="required" for="surat_izin">{{ trans('cruds.pinjam.fields.surat_izin') }} <small>(PDF/Word)</small></label>
                                     <div class="needsclick dropzone" id="surat_izin-dropzone">
                                     </div>
                                     @if($errors->has('surat_izin'))
@@ -149,6 +149,7 @@
     url: '{{ route('frontend.pinjams.storeMedia') }}',
     maxFilesize: 5, // MB
     maxFiles: 1,
+    acceptedFiles: "application/pdf,.doc,.docx",
     addRemoveLinks: true,
     headers: {
       'X-CSRF-TOKEN': "{{ csrf_token() }}"
@@ -199,6 +200,7 @@
     url: '{{ route('frontend.pinjams.storeMedia') }}',
     maxFilesize: 5, // MB
     maxFiles: 1,
+    acceptedFiles: "application/pdf,.doc,.docx",
     addRemoveLinks: true,
     headers: {
       'X-CSRF-TOKEN': "{{ csrf_token() }}"

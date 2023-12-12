@@ -23,7 +23,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalInformasiTitle">Informasi Peminjaaman</h5>
+                <h5 class="modal-title" id="modalInformasiTitle">Informasi Peminjaman</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -67,6 +67,7 @@
             timeFormat: 'H(:mm)',
             allDaySlot: false,
             eventClick: function(calEvent, jsEvent, view) {
+                $('#modalInformasiTitle').text(calEvent.header);
                 $('#modalInformasiBody').text(calEvent.body);
                 $('#modalInformasi').modal();
             },
@@ -79,11 +80,33 @@
                         title: 'Apakah Anda Ingin Mengajukan Peminjaman Kendaraan ?',
                         text: 'Pengajuan peminjaman kendaraan pada tanggal ' + date.format(),
                         icon: 'warning',
-                        buttons: ["Cancel", "Yes!"],
+                        // buttons: ["Cancel", "Yes!"],
+                        buttons: {
+                            cancel: "Cancel",
+                            book: {
+                                text: "Pesan",
+                                value: 'pesan',
+                                className: "btn-primary"
+                            },
+                            pinjam: {
+                                text: "Pinjam",
+                                value: 'pinjam',
+                                className: "btn-success"
+                            }
+                        },
                         showSpinner: true
                     }).then(function(value) {
-                        if (value) {
-                            window.location.href = "{{ route('frontend.pinjams.create') }}?kendaraan=" + kendaraan.slug + "&date=" + date.format();
+                        switch (value) {
+                            case "pesan":
+
+                                window.location.href = "{{ route('frontend.pinjams.book') }}?kendaraan=" + kendaraan.slug + "&date=" + date.format();
+
+                            break;
+
+                            case "pinjam":
+
+                                window.location.href = "{{ route('frontend.pinjams.create') }}?kendaraan=" + kendaraan.slug + "&date=" + date.format();
+                            break;
                         }
                     });
                 }

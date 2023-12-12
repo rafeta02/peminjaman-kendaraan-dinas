@@ -11,7 +11,7 @@ class StorePinjamRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('pinjam_create');
+        return true;
     }
 
     public function rules()
@@ -39,6 +39,12 @@ class StorePinjamRequest extends FormRequest
             ],
             'reason' => [
                 'string',
+                'required',
+            ],
+            'surat_permohonan' => [
+                'required',
+            ],
+            'surat_izin' => [
                 'required',
             ],
         ];
