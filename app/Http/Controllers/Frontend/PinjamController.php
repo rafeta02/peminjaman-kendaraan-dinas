@@ -185,6 +185,14 @@ class PinjamController extends Controller
 
     public function update(UpdatePinjamRequest $request, Pinjam $pinjam)
     {
+        LogPinjam::create([
+            'peminjaman_id' => $pinjam->id,
+            'kendaraan_id' => $pinjam->kendaraan_id,
+            'peminjam_id' => $pinjam->borrowed_by_id,
+            'jenis' => 'edit',
+            'log' => 'User Mengedit Peminjaman Kendaraan '. $pinjam->kendaraan->nama. ' Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
+        ]);
+
         $pinjam->update($request->all());
 
         if ($request->input('surat_permohonan', false)) {

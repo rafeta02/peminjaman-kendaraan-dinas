@@ -265,7 +265,7 @@
     });
 </script>
 
-{{-- <script>
+<script>
     $(function () {
         $('#date_start').datetimepicker().on('dp.change', function (e) {
             $('#date_end').data('DateTimePicker').minDate(e.date);
@@ -275,5 +275,5 @@
             $('#date_start').data('DateTimePicker').maxDate(e.date);
         });
     });
-</script> --}}
+</script>
 @endsection

@@ -40,7 +40,7 @@ class KendaraanController extends Controller
         })->whereIn('status_calender', ['booked', 'borrowed', 'noted'])->get();
 
         foreach($pinjams as $pinjam) {
-            $text = $pinjam->status_calender == 'borrowed' ? 'Dibooking' : 'Dipinjam';
+            $text = $pinjam->status_calender == 'borrowed' ? 'Dipinjam' : 'Dibooking';
 
             $events[] = [
                 'title' => 'Sudah '. $text. ' Oleh : '. $pinjam->name,

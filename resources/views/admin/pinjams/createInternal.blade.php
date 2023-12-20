@@ -3,30 +3,31 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('global.edit') }} {{ trans('cruds.pinjam.title_singular') }}
+        {{ trans('global.create') }} {{ trans('cruds.pinjam.title_singular') }} Internal
     </div>
 
     <div class="card-body">
-        <form method="POST" action="{{ route("admin.pinjams.update", [$pinjam->id]) }}" enctype="multipart/form-data">
-            @method('PUT')
+        @if (session()->has('error-message'))
+            <p class="text-danger">
+                {{session()->get('error-message')}}
+            </p>
+        @endif
+
+        <form method="POST" action="{{ route("admin.pinjams.storeInternal") }}" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-12">
                     <div class="form-group">
                         <label class="required" for="kendaraan_id">{{ trans('cruds.pinjam.fields.kendaraan') }}</label>
                         <select name="kendaraan_id" id="kendaraan_id" class="form-control select2 {{ $errors->has('kendaraan') ? 'is-invalid' : '' }}" style="width: 100%;" required>
-                            <option value="{{ $pinjam->kendaraan->id }}">{{ $pinjam->kendaraan->nama }}</option>
+                            <option></option>
                         </select>
-                        @if($errors->has('kendaraan'))
-                            <span class="text-danger">{{ $errors->first('kendaraan') }}</span>
-                        @endif
-                        <span class="help-block">{{ trans('cruds.pinjam.fields.kendaraan_helper') }}</span>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label class="required" for="date_start">{{ trans('cruds.pinjam.fields.date_start') }}</label>
-                        <input class="form-control datetime {{ $errors->has('date_start') ? 'is-invalid' : '' }}" type="text" name="date_start" id="date_start" value="{{ old('date_start', $pinjam->date_start) }}" required>
+                        <input class="form-control datetime {{ $errors->has('date_start') ? 'is-invalid' : '' }}" type="text" name="date_start" id="date_start" value="{{ old('date_start') }}" required>
                         @if($errors->has('date_start'))
                             <span class="text-danger">{{ $errors->first('date_start') }}</span>
                         @endif
@@ -36,7 +37,7 @@
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label class="required" for="date_end">{{ trans('cruds.pinjam.fields.date_end') }}</label>
-                        <input class="form-control datetime {{ $errors->has('date_end') ? 'is-invalid' : '' }}" type="text" name="date_end" id="date_end" value="{{ old('date_end', $pinjam->date_end) }}" required>
+                        <input class="form-control datetime {{ $errors->has('date_end') ? 'is-invalid' : '' }}" type="text" name="date_end" id="date_end" value="{{ old('date_end') }}" required>
                         @if($errors->has('date_end'))
                             <span class="text-danger">{{ $errors->first('date_end') }}</span>
                         @endif
@@ -46,7 +47,7 @@
                 <div class="col-12">
                     <div class="form-group">
                         <label class="required" for="reason">{{ trans('cruds.pinjam.fields.reason') }}</label>
-                        <input class="form-control {{ $errors->has('reason') ? 'is-invalid' : '' }}" type="text" name="reason" id="reason" value="{{ old('reason', $pinjam->reason) }}" required>
+                        <input class="form-control {{ $errors->has('reason') ? 'is-invalid' : '' }}" type="text" name="reason" id="reason" value="{{ old('reason', '') }}" required>
                         @if($errors->has('reason'))
                             <span class="text-danger">{{ $errors->first('reason') }}</span>
                         @endif
@@ -118,6 +119,7 @@
         $("#date_end").datetimepicker();
     });
 </script>
+
 <script>
     $(function () {
         $('#date_start').datetimepicker().on('dp.change', function (e) {

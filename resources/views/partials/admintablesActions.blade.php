@@ -1,4 +1,7 @@
 <a href="{{ route('admin.pinjams.show', $row->id) }}" class="btn btn-sm btn-block mb-1 btn-primary" >View</a>
+@if ($row->name == 'INTERNAL')
+    <a href="{{ route('admin.pinjams.edit', $row->id) }}" class="btn btn-sm btn-block mb-1 btn-info" >Edit</a>
+@endif
 
 @if ($row->status == 'pesan')
     <button class="btn btn-sm btn-block mb-1 btn-success button-accept-booking" data-id="{{ $row->id }}">Setujui</button>

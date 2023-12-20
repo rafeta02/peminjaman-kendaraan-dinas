@@ -6,6 +6,9 @@
             <a class="btn btn-success" href="{{ route('admin.pinjams.create') }}">
                 {{ trans('global.add') }} {{ trans('cruds.pinjam.title_singular') }}
             </a>
+            <a class="btn btn-primary" href="{{ route('admin.pinjams.internal') }}">
+                {{ trans('global.add') }} Pemesanan Internal
+            </a>
             {{-- <button class="btn btn-warning" data-toggle="modal" data-target="#csvImportModal">
                 {{ trans('global.app_csvImport') }}
             </button>

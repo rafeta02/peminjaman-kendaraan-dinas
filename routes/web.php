@@ -53,7 +53,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('pinjams/reject', 'PinjamController@reject')->name('pinjams.reject');
     Route::post('pinjams/save-driver', 'PinjamController@saveDriver')->name('pinjams.saveDriver');
     Route::get('pinjams/{pinjam}/balasan', 'PinjamController@balasan')->name('pinjams.balasan');
-    Route::put('pinjams/balasan/{pinjam}', 'PinjamController@storeBalasan')->name('pinjams.storeBalasan');
+    Route::get('pinjams/internal', 'PinjamController@internal')->name('pinjams.internal');
+    Route::post('pinjams/internal', 'PinjamController@storeInternal')->name('pinjams.storeInternal');
     Route::resource('pinjams', 'PinjamController');
 
     // Log Pinjam

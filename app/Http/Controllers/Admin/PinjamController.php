@@ -7,6 +7,7 @@ use App\Http\Controllers\Traits\CsvImportTrait;
 use App\Http\Controllers\Traits\MediaUploadingTrait;
 use App\Http\Requests\MassDestroyPinjamRequest;
 use App\Http\Requests\StorePinjamRequest;
+use App\Http\Requests\StorePinjamInternalRequest;
 use App\Http\Requests\UpdatePinjamRequest;
 use App\Http\Requests\UpdateBalasanPinjamRequest;
 use App\Models\Kendaraan;
@@ -93,19 +94,16 @@ class PinjamController extends Controller
     {
         abort_if(Gate::denies('pinjam_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $kendaraans = Kendaraan::pluck('type', 'id')->prepend(trans('global.pleaseSelect'), '');
-
-        $sopirs = Sopir::pluck('nama', 'id')->prepend(trans('global.pleaseSelect'), '');
-
-        return view('admin.pinjams.create', compact('kendaraans', 'sopirs'));
+        return view('admin.pinjams.create');
     }
 
     public function store(StorePinjamRequest $request)
     {
         $kendaraan = Kendaraan::find($request->kendaraan_id);
 
-        $request->request->add(['status' => 'pinjam']);
-        $request->request->add(['status_text' => 'Peminjaman Diajukan oleh "' . $request->name .' ('. $request->no_wa .')" Untuk kendaraan "'.$kendaraan->nama .'"']);
+        $request->request->add(['status' => 'disetujui']);
+        $request->request->add(['status' => 'borrowed']);
+        $request->request->add(['status_text' => 'Peminjaman Kendaraan oleh "' . $request->name .' ('. $request->no_wa .')" Untuk kendaraan "'.$kendaraan->nama .'"']);
         $request->request->add(['borrowed_by_id' => auth()->user()->id]);
 
         DB::beginTransaction();
@@ -128,8 +126,50 @@ class PinjamController extends Controller
                 'peminjaman_id' => $pinjam->id,
                 'kendaraan_id' => $pinjam->kendaraan_id,
                 'peminjam_id' => $pinjam->borrowed_by_id,
-                'jenis' => 'pinjam',
-                'log' => 'Peminjaman Kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"',
+                'jenis' => 'disetujui',
+                'log' => 'Peminjaman Kendaraan '. $pinjam->kendaraan->nama. ' Diajukan oleh "'. $pinjam->name.'" Untuk tanggal '. $pinjam->WaktuPeminjaman . ' Dengan keperluan "' . $pinjam->reason .'"  Disetujui oleh "'. auth()->user()->name .'"',
+            ]);
+
+            DB::commit();
+
+            Alert::success('Success', 'Peminjaman Kendaraan Berhasil Disimpan');
+
+            return redirect()->route('admin.pinjams.index');
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return redirect()->back()->with('error-message', $e->getMessage())->withInput();
+        }
+    }
+
+    public function internal()
+    {
+        abort_if(Gate::denies('pinjam_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        return view('admin.pinjams.createInternal');
+    }
+
+    public function storeInternal(StorePinjamInternalRequest $request)
+    {
+        $kendaraan = Kendaraan::find($request->kendaraan_id);
+
+        $request->request->add(['name' => 'INTERNAL']);
+        $request->request->add(['no_wa' => '-']);
+        $request->request->add(['status' => 'terpesan']);
+        $request->request->add(['status_calender' => 'booked']);
+        $request->request->add(['status_text' => 'Kendaraan "'.$kendaraan->nama .'" Telah dipesan untuk keperluan Internal']);
+        $request->request->add(['borrowed_by_id' => auth()->user()->id]);
+
+        DB::beginTransaction();
+        try {
+            $pinjam = Pinjam::create($request->all());
+
+            LogPinjam::create([
+                'peminjaman_id' => $pinjam->id,
+                'kendaraan_id' => $pinjam->kendaraan_id,
+                'peminjam_id' => $pinjam->borrowed_by_id,
+                'jenis' => 'terpesan',
+                'log' => 'Kendaraan "'.$kendaraan->nama .'" Telah Dipesan INTERNAL Untuk Keperluan "' . $pinjam->reason .'"',
             ]);
 
             DB::commit();
@@ -148,13 +188,36 @@ class PinjamController extends Controller
     {
         abort_if(Gate::denies('pinjam_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $kendaraans = Kendaraan::pluck('type', 'id')->prepend(trans('global.pleaseSelect'), '');
+        return view('admin.pinjams.edit', compact('pinjam'));
+    }
 
-        $sopirs = Sopir::pluck('nama', 'id')->prepend(trans('global.pleaseSelect'), '');
+    public function update(StorePinjamInternalRequest $request, Pinjam $pinjam)
+    {
+        $pinjam->update($request->all());
 
-        $pinjam->load('kendaraan', 'borrowed_by', 'processed_by', 'sopir', 'created_by');
+        if ($request->input('surat_permohonan', false)) {
+            if (! $pinjam->surat_permohonan || $request->input('surat_permohonan') !== $pinjam->surat_permohonan->file_name) {
+                if ($pinjam->surat_permohonan) {
+                    $pinjam->surat_permohonan->delete();
+                }
+                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_permohonan'))))->toMediaCollection('surat_permohonan');
+            }
+        } elseif ($pinjam->surat_permohonan) {
+            $pinjam->surat_permohonan->delete();
+        }
 
-        return view('admin.pinjams.edit', compact('kendaraans', 'pinjam', 'sopirs'));
+        if ($request->input('surat_izin', false)) {
+            if (! $pinjam->surat_izin || $request->input('surat_izin') !== $pinjam->surat_izin->file_name) {
+                if ($pinjam->surat_izin) {
+                    $pinjam->surat_izin->delete();
+                }
+                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_izin'))))->toMediaCollection('surat_izin');
+            }
+        } elseif ($pinjam->surat_izin) {
+            $pinjam->surat_izin->delete();
+        }
+
+        return redirect()->route('admin.pinjams.index');
     }
 
     public function balasan(Pinjam $pinjam)
@@ -184,62 +247,7 @@ class PinjamController extends Controller
         return redirect()->route('frontend.pinjams.index');
     }
 
-    public function update(UpdatePinjamRequest $request, Pinjam $pinjam)
-    {
-        $pinjam->update($request->all());
 
-        if ($request->input('surat_permohonan', false)) {
-            if (! $pinjam->surat_permohonan || $request->input('surat_permohonan') !== $pinjam->surat_permohonan->file_name) {
-                if ($pinjam->surat_permohonan) {
-                    $pinjam->surat_permohonan->delete();
-                }
-                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_permohonan'))))->toMediaCollection('surat_permohonan');
-            }
-        } elseif ($pinjam->surat_permohonan) {
-            $pinjam->surat_permohonan->delete();
-        }
-
-        if ($request->input('surat_izin', false)) {
-            if (! $pinjam->surat_izin || $request->input('surat_izin') !== $pinjam->surat_izin->file_name) {
-                if ($pinjam->surat_izin) {
-                    $pinjam->surat_izin->delete();
-                }
-                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($request->input('surat_izin'))))->toMediaCollection('surat_izin');
-            }
-        } elseif ($pinjam->surat_izin) {
-            $pinjam->surat_izin->delete();
-        }
-
-        if (count($pinjam->laporan_kegiatan) > 0) {
-            foreach ($pinjam->laporan_kegiatan as $media) {
-                if (! in_array($media->file_name, $request->input('laporan_kegiatan', []))) {
-                    $media->delete();
-                }
-            }
-        }
-        $media = $pinjam->laporan_kegiatan->pluck('file_name')->toArray();
-        foreach ($request->input('laporan_kegiatan', []) as $file) {
-            if (count($media) === 0 || ! in_array($file, $media)) {
-                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($file)))->toMediaCollection('laporan_kegiatan');
-            }
-        }
-
-        if (count($pinjam->foto_kegiatan) > 0) {
-            foreach ($pinjam->foto_kegiatan as $media) {
-                if (! in_array($media->file_name, $request->input('foto_kegiatan', []))) {
-                    $media->delete();
-                }
-            }
-        }
-        $media = $pinjam->foto_kegiatan->pluck('file_name')->toArray();
-        foreach ($request->input('foto_kegiatan', []) as $file) {
-            if (count($media) === 0 || ! in_array($file, $media)) {
-                $pinjam->addMedia(storage_path('tmp/uploads/' . basename($file)))->toMediaCollection('foto_kegiatan');
-            }
-        }
-
-        return redirect()->route('admin.pinjams.index');
-    }
 
     public function show(Pinjam $pinjam)
     {
